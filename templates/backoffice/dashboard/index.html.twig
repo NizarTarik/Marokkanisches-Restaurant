@@ -1,0 +1,81 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Dashboard
+{% endblock %}
+{% block body %}
+	<link href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+
+	<div class="container-scroller" style="margin-top: 65px;">
+		<div class="container-fluid page-body-wrapper">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+
+					<h1 class="pb-4 text-dark fw-bold">Dashboard</h1>
+
+					<div class="row g-4">
+						{% set cards = [
+							{'icon': 'mdi-account', 'color': 'primary', 'label': 'Total Users', 'count': totalUsers ~ ' registered users', 'route': 'admin_index'},
+							{'icon': 'mdi-account-box', 'color': 'info', 'label': 'Total Profiles', 'count': totalProfiles ~ ' client profiles', 'route': 'profile_index'},
+							{'icon': 'mdi-silverware-fork-knife', 'color': 'success', 'label': 'Total Meals', 'count': totalMeals ~ ' meals available', 'route': 'meal_index'},
+							{'icon': 'mdi-percent', 'color': 'warning', 'label': 'Total Discounts', 'count': totalDiscounts ~ ' active discounts', 'route': 'discount_index'},
+							{'icon': 'mdi-file-document-box-outline', 'color': 'secondary', 'label': 'Total Requests', 'count': totalRequests ~ ' pending requests', 'route': 'request_index'},
+							{'icon': 'mdi-star', 'color': 'danger', 'label': 'Total Reviews', 'count': totalReviews ~ ' customer reviews', 'route': 'reviews_index'},
+							{'icon': 'mdi-history', 'color': 'dark', 'label': 'Total Logs', 'count': totalLogs ~ ' activity logs', 'route': 'log_index'}
+						] %}
+
+						{% for card in cards %}
+							<div class="col-12 col-sm-6 col-lg-4">
+								<a href="{{ path(card.route) }}" class="text-decoration-none">
+									<div class="card shadow-sm p-4 d-flex flex-row align-items-center h-100 hover-shadow">
+										<i class="mdi {{ card.icon }} text-{{ card.color }} fs-1 me-4"></i>
+										<div>
+											<h6 class="mb-1 text-muted">{{ card.label }}</h6>
+											<h5 class="mb-0 fw-bold text-dark">{{ card.count }}</h5>
+										</div>
+									</div>
+								</a>
+							</div>
+						{% endfor %}
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<style>
+		.card {
+			transition: transform 0.3s ease, box-shadow 0.3s ease;
+			border-radius: 1rem;
+		}
+		.card:hover {
+			transform: translateY(-5px) scale(1.02);
+			box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+			cursor: pointer;
+		}
+
+		.fade-in {
+			opacity: 0;
+			transform: translateY(20px);
+			animation: fadeInUp 0.6s ease forwards;
+		}
+
+		@keyframes fadeInUp {
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+	</style>
+
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Logs
+{% endblock %}
+
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+
+	<div class="container-scroller" style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+			<div class="main-panel" style="position:relative">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<h1 class="pb-2" style="color:black">Log</h1>
+					<div class="col-lg-12 grid-margin stretch-card">
+						<div class="card">
+							<div class="card-body">
+								<form id="deleteLogsForm" action="{{ path('logDeleteMultiple') }}" method="POST">
+									<div class="mb-3">
+										<input type="checkbox" id="selectAll"/>
+										<label for="selectAll">Select All</label>
+									</div>
+
+									<div style="max-height:540px; overflow-y:auto;">
+										<table class="table" id="datatable">
+											<thead>
+												<tr>
+													<th></th>
+													<th>Date</th>
+													<th>User</th>
+													<th>Action</th>
+													<th>Category</th>
+													<th>Options</th>
+												</tr>
+											</thead>
+											<tbody>
+												{% for l in logs %}
+													<tr style="padding: 20px;">
+														<td><input type="checkbox" name="logsToDelete[]" value="{{ l.id }}" class="logCheckbox"></td>
+														<td>{{ l.date|date('d-m-Y') }}</td>
+														<td>
+															<a href="{{ path('admin_edit', {'id': l.user.id }) }}" style="color:black;text-decoration:none">
+																{{ l.user.firstname }}
+																{{ l.user.lastname }}
+																<span style="font-weight:bold">({{ l.user.profile.name }})</span>
+															</a>
+														</td>
+														<td>{{ l.text }}</td>
+														<td>{{ l.section }}</td>
+														<td style="padding: 20px;">
+															<a href="{{ path('log_delete', {'id': l.id}) }}" class="btn btn-sm btn-danger delete-single" style="display: inline;">
+																<i class="fas fa-trash"></i>
+															</a>
+														</td>
+													</tr>
+												{% endfor %}
+											</tbody>
+
+										</table>
+									</div>
+
+									<button type="submit" class="btn btn-danger mt-3" id="deleteMultipleBtn">Delete Selected Logs</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Select all outside table
+document.getElementById('selectAll').addEventListener('change', function () {
+document.querySelectorAll('.logCheckbox').forEach(checkbox => checkbox.checked = this.checked);
+});
+
+// Confirmation for deleting selected logs (bulk delete)
+document.getElementById('deleteMultipleBtn').addEventListener('click', function (event) {
+event.preventDefault();
+
+const selectedLogs = document.querySelectorAll('.logCheckbox:checked');
+if (selectedLogs.length === 0) {
+Swal.fire({title: 'No logs selected!', text: "Please select at least one log to delete.", icon: 'warning', confirmButtonColor: '#09122C'});
+return;
+}
+
+const form = document.getElementById('deleteLogsForm');
+
+Swal.fire({
+title: 'Delete logs?',
+text: "The selected logs won't be reverted!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, delete them!',
+cancelButtonText: 'Cancel'
+}).then(function (result) {
+if (result.isConfirmed) {
+form.submit();
+}
+});
+});
+
+// Confirmation for deleting individual logs (single delete)
+document.querySelectorAll('.delete-single').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault();
+
+Swal.fire({
+title: 'Delete log?',
+text: "This log won't be reverted!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Yes, delete it!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+this.closest('form').submit(); // This will submit the form for single log deletion
+}
+});
+});
+});
+
+// Initialize DataTable
+$(document).ready(function () {
+$('#datatable').DataTable({
+lengthMenu: [
+7, 15, 30
+],
+pageLength: 7
+});
+});
+	</script>
+{% endblock %}

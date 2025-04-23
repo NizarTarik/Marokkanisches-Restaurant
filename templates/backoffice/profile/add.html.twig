@@ -1,0 +1,286 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Create Profile
+{% endblock %}
+{% block body %}
+	<style>
+		.category-card {
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			margin-bottom: 10px;
+			overflow: hidden;
+		}
+
+		.category-header {
+			background-color: #f8f9fa;
+			padding: 10px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 18px;
+			font-weight: bold;
+		}
+
+		.category-content {
+			display: none;
+			padding: 10px;
+		}
+
+		/* Layout for categories */
+		.categories {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 20px;
+		}
+
+		/* Default .role-item styling */
+		.role-item {
+			border: 1px solid #ddd;
+			padding: 5px;
+			border-radius: 5px;
+			background-color: #fff;
+			transition: background-color 0.3s; /* Smooth transition for background color */
+		}
+
+		input[type="checkbox"] {
+			transform: scale(1.5); /* Increase the size to 1.5 times the original */
+			margin-right: 10px; /* Optional: Adds some space between checkbox and label */
+		}
+
+		/* Responsive adjustments */
+		@media(max-width: 1024px) {
+			.categories {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+
+		@media(max-width: 768px) {
+			.categories {
+				grid-template-columns: repeat(3, 1fr);
+			}
+
+			.role-item {
+				min-width: 150px;
+			}
+		}
+
+		@media(max-width: 480px) {
+			.categories {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.role-item {
+				min-width: 200px;
+			}
+		}
+	</style>
+	<div class="container-scroller" style="margin-top:65px">
+
+		<div class="container-fluid page-body-wrapper ">
+
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div
+				class="main-panel ">
+
+				{# Flash Messages Section #}
+
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class=" col-md-3 col-sm-5  alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<div class="d-flex justify-content-between " style="align-items-center">
+
+						<h1 class="pb-2" style="color:black">
+							Create profile
+						</h1>
+						<a class="nav-link" href="{{path('profile_index')}}">
+							<button type="submit" class="btn btn-dark me-2 ">
+								Profile list
+
+							</button>
+						</a>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card">
+
+								<div class="card-body">
+									<div class="row">
+
+
+										<form class="forms-sample" method="POST" id="form" enctype="multipart/form-data">
+											<div class="page-header mb-12">
+												<div class="form-group row col-md-6">
+													<label class="col-md-3 col-form-label">Name :
+													</label>
+													<div class="col-md-9">
+														<input type="text" class="form-control" id="libelle" name="name" value="{{data.name}}">
+													</div>
+												</div>
+												<div class="form-group row col-md-6">
+													<label class="col-md-3 col-form-label">Description :
+													</label>
+													<div class="col-md-9">
+														<div class="col-md-12">
+															<textarea class="form-control" id="description" name="description"></textarea>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div style="display:flex;justify-content: space-between">
+												<label class="pb-1" style="color:#4566ad;font-size: 23px;margin-left: 10px;">
+													<strong>
+														Roles list</strong>
+												</label>
+												<button class="btn btn-dark mb-2" type="button" id="checkAllRoles" style='background-color:red;border:none;'>Select all</button>
+											</div>
+											<div class="page-header card p-3">
+												<div class="form-group col-md-12">
+													<div class="table-responsive">
+														<div class="categories">
+															{% for category, roles in rolesListe %}
+																<div class="category-card">
+																	<div class="category-header" onclick="toggleCategory('{{ category }}')">
+																		<span>
+																			<span id="icon-{{ category }}" style="margin-right:14px">+</span>
+																			<input type="checkbox" class="category-checkbox" name="Tout" onclick="selectAll(this, '{{ category }}'); toggleCategory('{{ category }}', true); event.stopPropagation();"/>
+																			{{ category }}
+																		</span>
+																	</div>
+																	<div class="category-content" id="content-{{ category }}">
+																		<div class="roles-container">
+																			{% for role in roles %}
+																				<div class="role-item">
+																					<input class="border-checkbox user-check {{ category }}" name="roles[{{ role.id }}]" type="checkbox" id="checkbox{{ role.id }}">
+																					<label class="border-checkbox-label" for="checkbox{{ role.id }}">{{ role.description }}</label>
+																				</div>
+																			{% endfor %}
+																		</div>
+																	</div>
+																</div>
+															{% endfor %}
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div style="display:flex;justify-content: center;">
+												<input type="submit" class="btn btn-dark waves-effect waves-light" value="Add profil" style='background-color:green;border:none;' id="AddProfileBtn">
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- main-panel ends -->
+</div>
+<!-- page-body-wrapper ends --></div><script>
+function toggleCategory(category, forceShow = false) {
+let content = document.getElementById("content-" + category);
+let icon = document.getElementById("icon-" + category);
+let checkbox = document.querySelector (`input.category-checkbox[name="Tout"][onclick*="'${category}'"]`);
+
+if (forceShow || checkbox.checked) {
+content.style.display = "block";
+icon.textContent = "-";
+} else {
+content.style.display = content.style.display === "none" ? "block" : "none";
+icon.textContent = content.style.display === "none" ? "+" : "-";
+}
+}
+
+// JavaScript to handle checking all checkboxes and showing all categories
+document.getElementById('checkAllRoles').addEventListener('click', function () {
+var checkboxes = document.querySelectorAll('input[type="checkbox"].user-check');
+var button = document.getElementById('checkAllRoles');
+var checkboxesC = document.querySelectorAll('input[type="checkbox"].category-checkbox');
+
+if (button.innerText === 'Select all') { // Check all user checkboxes
+checkboxes.forEach(function (checkbox) {
+checkbox.checked = true;
+updateBackgroundColor(checkbox); // Update background color
+});
+
+// Check all category checkboxes and show their respective category-content
+checkboxesC.forEach(function (checkbox) {
+checkbox.checked = true;
+// Show the category content for each checked category
+let category = checkbox.getAttribute("onclick").match(/'([^']+)'/)[1]; // Extract category name from onclick
+toggleCategory(category, true); // Force show category content
+});
+
+button.innerText = 'Remove all';
+} else { // Uncheck all user checkboxes
+checkboxes.forEach(function (checkbox) {
+checkbox.checked = false;
+updateBackgroundColor(checkbox); // Update background color
+});
+
+// Uncheck all category checkboxes and hide their respective category-content
+checkboxesC.forEach(function (checkbox) {
+checkbox.checked = false;
+// Hide the category content for each unchecked category
+let category = checkbox.getAttribute("onclick").match(/'([^']+)'/)[1]; // Extract category name from onclick
+toggleCategory(category, false); // Force hide category content
+});
+
+button.innerText = 'Select all';
+}
+});
+
+// Update background color of checkboxes
+function updateBackgroundColor(checkbox) {
+if (checkbox.checked) {
+checkbox.parentElement.style.backgroundColor = "#E4E0E1"; // Light gray background when checked
+} else {
+checkbox.parentElement.style.backgroundColor = "#fff"; // White background when unchecked
+}
+}
+
+// Handle individual checkbox changes
+document.querySelectorAll('.user-check').forEach(function (checkbox) {
+checkbox.addEventListener('change', function () {
+updateBackgroundColor(checkbox);
+});
+
+// Initialize background color when the page loads (in case some are pre-checked)
+updateBackgroundColor(checkbox);
+});
+
+// Function to select all checkboxes within a category
+function selectAll(categoryCheckbox, category) {
+var rolesCheckboxes = document.querySelectorAll('input[type="checkbox"].user-check.' + category);
+rolesCheckboxes.forEach(function (checkbox) {
+checkbox.checked = categoryCheckbox.checked;
+updateBackgroundColor(checkbox); // Update background color
+});
+
+}
+document.getElementById('AddProfileBtn').addEventListener('click', function (event) {
+event.preventDefault();
+Swal.fire({
+title: 'Create profile?',
+text: 'Do you want to create this profile ?',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#9AA6B2',
+confirmButtonText: 'Yes, create',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+this.closest('form').submit();
+}
+});
+});</script>{% endblock %}

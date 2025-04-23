@@ -1,0 +1,160 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Profiles
+{% endblock %}
+
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+	<div class="container-scroller" style="margin-top:65px">
+		<div class="container-fluid  page-body-wrapper ">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel " style="position:relative">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<h1 class="pb-2" style="color:black">
+						Profiles
+					</h1>
+					<div class="col-lg-12 grid-margin stretch-card">
+						<div class="card">
+							<div class="card-body">
+								<div style="max-height:54 0px; overflow-y: auto;">
+									<table class="table table-striped" id="datatable">
+										<thead>
+											<tr>
+
+												<th>Role</th>
+												<th>Description</th>
+												<th>Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for profile in profiles %}
+												<tr>
+
+													<td>{{ profile.name }}</td>
+													<td>{{ profile.description }}
+
+													</td>
+
+													<td>
+
+														{% if profile.status == 0 %}
+
+															<a href="{{ path('profile_edit', { 'id': profile.id }) }}">
+																<button class="btn btn-sm btn-dark">
+																	<i class="mdi  mdi-lead-pencil"></i>
+																	<span>Edit</span>
+																</button>
+															</a>
+															<form action="{{ path('profile_delete', {'id': profile.id}) }}" method="POST" style="display: inline;">
+																<input type="hidden" name="_method" value="DELETE">
+																<button type="submit" class="btn btn-sm btn-danger">
+																	<i class="fas fa-trash"></i>
+																	<span>Delete</span>
+																</button>
+
+															</form>
+															<button class="btn btn-success btn-sm" data-meal-id="{{ profile.id }}">
+																Validate
+															</button>
+														{% else %}
+
+															{% if profile.id  in users_profiles_ids %}
+																<button disabled class="btn btn-sm btn-success">
+
+																	<span>Validated</span>
+																</button>
+																<button disabled class="btn btn-sm btn-danger">
+
+																	<span>Profile Used</span>
+																</button>
+															{% else %}
+																<button disabled class="btn btn-sm btn-success">
+
+																	<span>Validated</span>
+																</button>
+															{% endif %}
+
+
+														{% endif %}
+													</td>
+												</tr>
+											</td>
+										</tbody>
+									</tr>
+
+								{% endfor %}
+							</tbody>
+						</table>
+						<a href="{{ path('profile_add') }}">
+							<button class="btn btn-sm btn-dark" style='background-color:green;border:none'>New Profile
+								<i class="fa-solid fa-plus fa-lg p-1" style="color: #ffffff;"></i>
+							</button>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div></div></div><script>document.querySelectorAll('#datatable tbody .btn-danger').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault(); // Prevent form submission for now
+
+Swal.fire({
+title: 'Delete profile?',
+text: "You won't be able to revert this!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, delete it!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) { // If confirmed, submit the form
+this.closest('form').submit();
+}
+});
+});
+});
+
+$(document).ready(function () {
+$('#datatable').DataTable({
+lengthMenu: [
+4, 8, 15
+],
+pageLength: 4
+});
+});
+
+// Validation confirmation (redirect instead of form submission)
+document.querySelectorAll('#datatable tbody .btn-success').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault();
+
+let mealId = this.getAttribute('data-meal-id'); // Get meal ID from button attribute
+let validateUrl = `/profile/validate/${mealId}`; // Adjust URL structure as per your route
+
+Swal.fire({
+title: 'Validate profile?',
+text: "Do you want to validate this profile?",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#1fcf51', // Success green color
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, validate !',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+window.location.href = validateUrl; // Redirect to validation URL
+}
+});
+});
+});</script>{% endblock %}

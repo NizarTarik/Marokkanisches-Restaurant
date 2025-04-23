@@ -1,0 +1,328 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Edit User
+{% endblock %}
+
+{% block body %}
+	<div class="container-scroller" style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			{% for type, messages in app.flashes %}
+				{% for message in messages %}
+					<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+						{{ message }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				{% endfor %}
+			{% endfor %}
+
+			<div class="main-panel">
+				<div class="content-wrapper">
+					<h1 class="pb-2" style="color:black" id='h1'>Profile/ Roles</h1>
+					<div
+						class="col-lg-12 grid-margin stretch-card">
+
+						<!-- Toggle Button -->
+						<button type="button" class="btn btn-info mb-3" id="toggleBtn" style="position:absolute;">
+							<i class="fa-solid fa-right-left me-2"></i>
+							To Account
+						</button>
+
+
+						<!-- Form -->
+						<form id="adminForm" method="POST" action="{{ path('admin_update', { 'id': edited_admin.id }) }}" class="forms-sample col-lg-9 col-md-10 col-sm-10" style="margin:auto;display: none;">
+							<div class="row d-flex">
+								<div class="row mb-4">
+									<div class="d-flex justify-content-center align-items-center col-2" style="margin:auto">
+										<img src="/{{ edited_admin.img ? edited_admin.img : 'uploads/images/backoffice/default.jpg' }}" style="object-fit:contain;width:100px;height:100px;border-radius:50%;"/>
+									</div>
+								</div>
+
+								<div class="form-group col-6">
+									<label for="firstname">First Name</label>
+									<input type="text" id="firstname" class="form-control" value="{{ edited_admin.firstname }}" name="firstname" required/>
+								</div>
+
+								<div class="form-group col-6">
+									<label for="lastname">Last Name</label>
+									<input type="text" id="lastname" class="form-control" value="{{ edited_admin.lastname }}" name="lastname" required/>
+								</div>
+							</div>
+
+							<div class="row d-flex">
+								<div class="form-group col-6">
+									<label for="email">Email</label>
+									<input type="email" class="form-control" value="{{ edited_admin.email }}" name="email" required/>
+								</div>
+
+								<div class="form-group col-6">
+									<label for="password">Password</label>
+									<input type="password" id="password" class="form-control" name="password" value="{{ edited_admin.password }}"/>
+								</div>
+							</div>
+
+							<div class="row d-flex">
+								<div class="form-group col-6">
+									<label for="Address">Address</label>
+									<input type="text" class="form-control" name="address" value="{{ edited_admin.address }}"/>
+								</div>
+
+								<div class="form-group col-6">
+									<label for="Phone">Phone</label>
+									<input type="text" class="form-control" value="{{ edited_admin.phone }}" name="phone" required/>
+								</div>
+							</div>
+
+							<div class="row d-flex">
+								<div class="form-group col-6">
+									<label for="img">Profile</label>
+									<select class="select2 form-control" id="profil" name="profile" onchange="restorePero()" style="width: 100%;">
+										{% for p in profils %}
+											<option value="{{ p.id }}" {% if edited_admin.profile.id == p.id %} selected {% endif %}>{{ p.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div class="form-group col-6">
+									<label for="img">Image</label>
+									<input type="file" name="img" id="img" class="form-control" accept="image/png, image/jpeg"/>
+								</div>
+							</div>
+
+							<a href="{{ path('admin_index') }}">
+								<button type="button" class="btn btn-light">Back</button>
+							</a>
+							<button type="submit" class="btn btn-dark me-2" id="modifyUserBtn">Save</button>
+						</form>
+
+						<!-- Hidden Div -->
+						<div class="form-group col-md-12 m-5" id="hiiiDiv" style="display: block;">
+							<div class="page-header mb-12">
+								<div class="form-group row col-md-6">
+									<label class="col-md-3 col-form-label">Name :
+									</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control" id="libelle" name="name" disabled value="{{profile.name}}">
+									</div>
+								</div>
+								<div class="form-group row col-md-6">
+									<label class="col-md-3 col-form-label">Description :
+									</label>
+									<div class="col-md-9">
+										<div class="col-md-12">
+											<textarea class="form-control" id="description" maxlength="42" disabled name="description">{{profile.description}}</textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="table-responsive">
+								<div class="categories">
+									{% for category, roles in rolesListe %}
+										<div class="category-card">
+											<div class="category-header" onclick="toggleCategory('{{ category }}')">
+												<span>
+													<span id="icon-{{ category }}" style="margin-right:14px">+</span>
+													<input type="checkbox" class="category-checkbox" disabled name="Tout" onclick="selectAll(this, '{{ category }}'); toggleCategory('{{ category }}', true); event.stopPropagation();"/>
+													{{ category }}
+												</span>
+											</div>
+											<div class="category-content" id="content-{{ category }}">
+												<div class="roles-container">
+													{% for role in roles %}
+														<div class="role-item">
+															<input class="border-checkbox user-check {{ category }}" disabled name="roles[{{ role.id }}]" type="checkbox" id="checkbox{{ role.id }}" {% if role in profile.roles %} checked {% endif %}>
+															<label class="border-checkbox-label" for="checkbox{{ role.id }}">{{ role.description }}</label>
+														</div>
+													{% endfor %}
+												</div>
+											</div>
+										</div>
+									{% endfor %}
+								</div>
+								<!-- Check if the profile has the 'UPDATEPROFILE' role -->
+								{% set showEditButton = false %}
+
+								{% set roles = admin.profile.roles %}
+								{% for role in roles %}
+									{% if role.name == 'UPDATEPROFILE' %}
+										{% set showEditButton = true %}
+									{% endif %}
+								{% endfor %}
+
+								<!-- If the profile has 'UPDATEPROFILE', show the edit button -->
+								{% if showEditButton %}
+									<a href="{{ path('profile_edit', { 'id': profile.id }) }}">
+										<button class="btn btn-sm btn-dark mt-3 p-3">
+											<i class="mdi mdi-lead-pencil"></i>
+											<span>Edit this profile</span>
+										</button>
+									</a>
+								{% endif %}
+
+							</div>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<style>
+		.category-card {
+			border: 1px solid #ddd;
+			border-radius: 8px;
+			margin-bottom: 10px;
+			overflow: hidden;
+		}
+
+		.category-header {
+			background-color: #f8f9fa;
+			padding: 10px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 18px;
+			font-weight: bold;
+		}
+
+		.category-content {
+			display: block;
+			padding: 10px;
+		}
+
+		/* Layout for categories */
+		.categories {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 20px;
+		}
+
+		/* Default .role-item styling */
+		.role-item {
+			border: 1px solid #ddd;
+			padding: 5px;
+			border-radius: 5px;
+			background-color: #fff;
+			transition: background-color 0.3s; /* Smooth transition for background color */
+		}
+
+		input[type="checkbox"] {
+			transform: scale(1.5); /* Increase the size to 1.5 times the original */
+			margin-right: 10px; /* Optional: Adds some space between checkbox and label */
+		}
+
+		/* Responsive adjustments */
+		@media(max-width: 1024px) {
+			.categories {
+				grid-template-columns: repeat(4, 1fr);
+			}
+		}
+
+		@media(max-width: 768px) {
+			.categories {
+				grid-template-columns: repeat(3, 1fr);
+			}
+
+			.role-item {
+				min-width: 150px;
+			}
+		}
+
+		@media(max-width: 480px) {
+			.categories {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.role-item {
+				min-width: 200px;
+			}
+		}
+		.fade-in {
+			animation: fadeIn 0.3s ease-in-out forwards;
+		}
+
+		.fade-out {
+			animation: fadeOut 0.3s ease-in-out forwards;
+		}
+
+		@keyframes fadeIn {
+			0% {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+			100% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		@keyframes fadeOut {
+			0% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+			100% {
+				opacity: 0;
+				transform: translateY(10px);
+			}
+		}
+	</style>
+
+	<!-- Scripts -->
+	<script>
+		document.getElementById('modifyUserBtn').addEventListener('click', function (event) {
+event.preventDefault();
+Swal.fire({
+title: 'Modify this user?',
+text: 'You can back and modify any time',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#9AA6B2',
+confirmButtonText: 'Yes, modify!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+this.closest('form').submit();
+}
+});
+});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+const toggleBtn = document.getElementById('toggleBtn');
+const h1 = document.getElementById('h1');
+const form = document.getElementById('adminForm');
+const hiiiDiv = document.getElementById('hiiiDiv');
+
+toggleBtn.addEventListener('click', function () {
+const isFormVisible = form.style.display === 'block';
+
+if (! isFormVisible) {
+form.style.display = 'block';
+hiiiDiv.style.display = 'none';
+toggleBtn.innerHTML = '<i class="fa-solid  fa-right-left  me-2"></i> To Profile / Roles';
+h1.textContent = 'Account';
+} else {
+form.style.display = 'none';
+hiiiDiv.style.display = 'block';
+toggleBtn.innerHTML = '<i class="fa-solid  fa-right-left  me-2"></i> To Account'; // Keep the same icon here
+h1.textContent = 'Profile / Roles';
+}
+
+// Fade animations
+form.classList.add('fade-in');
+hiiiDiv.classList.add('fade-out');
+
+setTimeout(() => {
+form.classList.remove('fade-in');
+hiiiDiv.classList.remove('fade-out');
+}, 300);
+});
+});
+	</script>
+
+
+{% endblock %}

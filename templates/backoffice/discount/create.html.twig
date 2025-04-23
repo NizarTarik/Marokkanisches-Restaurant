@@ -1,0 +1,133 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Create Discount
+{% endblock %}
+
+{% block body %}
+	<div class="container-scroller ">
+		<div class="container-fluid page-body-wrapper" style="margin-top:65px">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+
+					<div
+						class="row">
+						<!-- Card Section -->
+						<div class="col-xl-3 col-lg-4 col-md-5 col-sm-7 mb-4">
+							<div class="card">
+								<img src="/{{meal.image }}" alt="{{meal.name }}" class="card-img-top ">
+								<div class="card-body">
+									<h5 class="card-title">{{ meal.name }}
+										-
+										<span>{{ meal.type }}</span>
+									</h5>
+									<p class="card-text">{{ meal.description }}</p>
+								</div>
+
+								<div class="card-text pb-1" style="font-size:1.5rem;padding-left: 2.4rem;">
+									{{ meal.price }}
+									<b>$</b>
+								</div>
+							</div>
+						</div>
+						<!-- Form Section -->
+						<div class="col-xl-8 col-lg-8 col-md-6 mb-4">
+							<h1 class="pb-2" style="color:black">Set Discount</h1>
+							<div class="card">
+								<div class="card-body">
+									<form action="{{ path('discount_store', { 'id': meal.id }) }}" method="POST">
+										<input type="hidden" name="_csrf_token" value="{{ csrf_token('discount_store') }}">
+
+										<div class="row d-flex">
+											<div class="form-group col-6">
+												<label for="originalPrice" class="pt-1">Meal Price</label>
+												<input type="text" class="form-control" id="originalPrice" value="{{meal.price}} $" disabled required/>
+											</div>
+											<div class="form-group col-6">
+												<label for="newPrice">Set Discount Price</label>
+												<input type="number" class="form-control" id="newPrice" name="price" placeholder="Price" min="0" required oninput="calculateDiscount()"/>
+											</div>
+										</div>
+
+										<div class="form-group col-8">
+											<label for="discountedPrice" class="pt-1 col-12">Discounted Amount</label>
+											<span class="color-danger font-weight-bold col-8" style="font-size: 1.5rem; color: red;">
+
+												-
+												<span id="discountedPrice">0</span>
+												$<span id="discountPrecent" style="margin-left:25px;color:green">(0%)</span>
+											</span>
+										</div>
+
+										<div class="row d-flex">
+											<div class="form-group col-6">
+												<label for="startDate" class="pt-1">Discount Start</label>
+												<input type="date" class="form-control" name="startdate" id="startdate" required/>
+
+											</div>
+											<div class="form-group col-6">
+												<label for="finalDate" class="pt-1">Discount end</label>
+												<input type="date" class="form-control" name="finaledate" required/>
+											</div>
+										</div>
+										<button type="submit" class="btn btn-dark me-2" id="setDiscountBtn">Set discount</button>
+
+										<button type="button" class="btn btn-light">Cancel</button>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.getElementById('startdate').valueAsDate = new Date();
+function calculateDiscount() {
+let originalPrice = parseFloat(document.getElementById('originalPrice').value);
+let newPrice = parseFloat(document.getElementById('newPrice').value);
+
+let discountedPrice = originalPrice - newPrice;
+let discountPercent = ((discountedPrice / originalPrice) * 100).toFixed(2);
+
+// Ensure discounted price is not negative
+document.getElementById('discountedPrice').innerText = discountedPrice >= 0 ? discountedPrice.toFixed(2) : "0.00";
+document.getElementById('discountPrecent').innerText = discountedPrice >= 0 ? `(${discountPercent}%)` : "(0%)";
+}
+
+document.getElementById('setDiscountBtn').addEventListener('click', function (event) {
+event.preventDefault(); // Prevent form submission for now
+
+Swal.fire({
+title: 'Set Discount?',
+text: 'Do You want to Set this discount ?',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#9AA6B2',
+confirmButtonText: 'Yes, Set!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) { // If confirmed, submit the form
+this.closest('form').submit();
+}
+});
+});
+
+// Run function when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+calculateDiscount();
+});
+	</script>
+{% endblock %}

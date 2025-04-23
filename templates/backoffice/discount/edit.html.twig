@@ -1,0 +1,236 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Edit Discount
+{% endblock %}
+
+{% block body %}
+	<div class="container-scroller " style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper ">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+
+					<div
+						class="row d-flex">
+						<!-- Card Section -->
+						<div class="col-xl-3 col-lg-6 col-md-5 col-sm-5 ">
+							<div class="cards_item">
+								<div class="card">
+									<div class="card_image">
+										<img src="/{{ meal.image }}" alt="{{ meal.name }}"/>
+									</div>
+
+									<div class="card_content">
+										<h2 class="card_title">{{ meal.name }}<p class="pt-1">{{ meal.type }}</p>
+										</h2>
+
+										<div class="card_text">
+											{% if meal.discount %}
+												<div>
+													<span class="text-danger font-weight-bold text-decoration-line-through">{{ meal.price }}$</span>
+													<span class="font-weight-bold" id="cardDiscountedPrice">{{ meal.discount.discountprice }}$</span>
+												</div>
+												{% if meal.discount.remainingDays is defined %}
+													<p class="text-warning">
+														Discount ends in:
+														{{ meal.discount.remainingDays }}
+														day{{ meal.discount.remainingDays > 1 ? 's' : '' }}
+													</p>
+												{% endif %}
+											{% else %}
+												<span class="font-weight-bold ">{{ meal.price }}$</span>
+											{% endif %}
+											<p>{{ meal.description }}</p>
+											<hr/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Form Section -->
+						<div class="col-xl-8 col-lg-6 col-md-7 col-sm-7 mb-4">
+							<div class="card">
+								<div class="card-body">
+									<h4 class="card-title">Edit Discount</h4>
+									<form action="{{ path('discount_update', { 'id': meal.discount.id }) }}" method="POST" onsubmit="return validateForm()">
+										<input type="hidden" name="_csrf_token" value="{{ csrf_token('discount_update') }}">
+
+										<div class="row d-flex">
+											<div class="form-group col-6">
+												<label for="originalPrice" class="pt-1">Meal Price</label>
+												<input type="text" class="form-control" id="originalPrice" value="{{ meal.price }}" disabled required/>
+											</div>
+											<div class="form-group col-6">
+												<label for="newPrice">Set new Price</label>
+												<input type="number" class="form-control" id="newPrice" name="price" value="{{ meal.discount.discountprice }}" placeholder="Price" min="0" required oninput="calculateDiscount()"/>
+											</div>
+										</div>
+
+										<div class="form-group col-8">
+											<label for="discountedPrice" class="pt-1 col-12">Discounted Price</label>
+											<span class="color-danger font-weight-bold col-8" style="font-size: 1.5rem; color: red;">
+												-
+												<span id="discountedPrice">0</span>
+												$<span id="discountPrecent" style="margin-left:25px;color:green">(0%)</span</span>
+											</div>
+
+											<div class="row d-flex">
+												<div class="form-group col-6">
+													<label for="startDate" class="pt-1">Discount Start</label>
+													<input type="date" class="form-control" name="startdate" value="{{ meal.discount.startdate|date('Y-m-d') }}" required/>
+												</div>
+												<div class="form-group col-6">
+													<label for="finalDate" class="pt-1">Discount end</label>
+													<input type="date" class="form-control" name="finaldate" value="{{ meal.discount.finaldate|date('Y-m-d') }}" required/>
+												</div>
+											</div>
+											<button type="submit" class="btn me-2" style="background-color: #c89b3f;color:white" id="setdiscountbtn">Set discount</button>
+											<button type="button" class="btn btn-light">Cancel</button>
+
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+
+			document.getElementById('setdiscountbtn').addEventListener('click', function (event) {
+event.preventDefault(); // Prevent form submission for now
+
+Swal.fire({
+title: 'Modify discount?',
+text: 'do you want to modify this discount',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#9AA6B2',
+confirmButtonText: 'Yes, modify !',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) { // If confirmed, submit the form
+this.closest('form').submit();
+}
+});
+});
+
+function calculateDiscount() {
+const originalPrice = {{ meal.price }};
+const newPrice = parseFloat(document.getElementById('newPrice').value);
+const discountedPrice = originalPrice - newPrice;
+let discountPercent = ((discountedPrice / originalPrice) * 100).toFixed(2);
+
+document.getElementById('discountedPrice').textContent = discountedPrice > 0 ? discountedPrice : 0;
+document.getElementById('discountPrecent').innerText = discountedPrice >= 0 ? `(${discountPercent}%)` : "(0%)";
+
+
+}
+function validateForm() {
+const newPrice = document.getElementById('newPrice').value;
+const startDate = document.querySelector('[name="startdate"]').value;
+const finalDate = document.querySelector('[name="finaledate"]').value;
+
+// Ensure new price, start date, and final date are valid
+if (newPrice <= 0 || ! startDate || ! finalDate) {
+alert("Please ensure all fields are filled correctly.");
+return false;
+}
+return true;
+}
+
+// Run function when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+calculateDiscount();
+});
+		</script>
+		<style>
+			body {
+				font-family: "Oxygen", sans-serif;
+			}
+
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+			}
+
+
+			.card_image img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+			}
+
+
+			.card_content {
+				position: relative;
+				padding: 5px 12px 32px 24px;
+				margin: 16px 8px 8px 0;
+				max-height: 230px;
+				overflow-y: scroll;
+			}
+
+			.card_content::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			.card_content::-webkit-scrollbar-track {
+				box-shadow: 0;
+				border-radius: 0;
+			}
+
+			.card_content::-webkit-scrollbar-thumb {
+				background: #c89b3f;
+				border-radius: 15px;
+			}
+
+			.card_title {
+				position: relative;
+				margin: 0 0 18px;
+				padding-bottom: 3px;
+				text-align: center;
+				font-size: 20px;
+				font-weight: 700;
+			}
+
+			.card_title::after {
+				position: absolute;
+				display: block;
+				width: 50px;
+				height: 2px;
+				bottom: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				background-color: #c89b3f;
+				content: "";
+			}
+
+			hr {
+				margin: 24px auto;
+				width: 50px;
+				border-top: 2px solid #c89b3f;
+			}
+
+			.card_text p {
+				font-size: 14px;
+				line-height: 1.5;
+			}
+
+			.card_text p:last-child {
+				margin: 0;
+			}
+		</style>
+	{% endblock %}

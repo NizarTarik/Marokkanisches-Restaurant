@@ -1,0 +1,190 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Requests
+{% endblock %}
+
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+
+	<div class="container-scroller" style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel" style="position:relative">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+
+					<h1 class="pb-2" style="color:black">Requests list</h1>
+
+					<div class="col-lg-12 grid-margin stretch-card">
+						<div class="card">
+							<div class="card-body">
+								<form id="deleteLogsForm" action="{{ path('requestDeleteMultiple') }}" method="POST">
+									<div class="mb-3">
+										<input type="checkbox" id="selectAll"/>
+										<label for="selectAll">Select All</label>
+									</div>
+
+									<div style="max-height:540px; overflow-y: auto;">
+										<table class="table table-striped" id="datatable">
+											<thead>
+												<tr>
+													<th></th>
+													<th>Meal</th>
+													<th>Name</th>
+													<th>Type</th>
+													<th>Price</th>
+													<th>Status/Action</th>
+												</tr>
+											</thead>
+											<tbody>
+												{% for meal in requests %}
+													<tr>
+														<td>
+															<input type="checkbox" name="requestsToDelete[]" value="{{ meal.id }}" class="logCheckbox">
+														</td>
+														<td style="display: flex; align-items: center; justify-content: center;">
+															<img src="/{{ meal.image }}" alt="{{ meal.name }}" style="width: 70px; height: 70px; border-radius: 20%; object-fit: cover;">
+														</td>
+														<td>{{ meal.name }}</td>
+														<td>
+															{{ meal.type }}
+															{% if meal.discount %}
+																{% set discountPercentage = ((meal.price - meal.discount.discountprice) / meal.price) * 100 %}
+																<span class="text-primary font-weight-bold">({{ discountPercentage|round(2) }}%)</span>
+															{% endif %}
+														</td>
+														<td>
+															{% if meal.discount %}
+																<span class="text-success font-weight-bold">only
+																	{{ meal.discount.discountprice }}$</span>
+																<span class="text-danger font-weight-bold text-decoration-line-through">{{ meal.price }}$</span>
+															{% else %}
+																<span class="font-weight-bold">{{ meal.price }}$</span>
+															{% endif %}
+														</td>
+														<td>
+															<button class="btn btn-success btn-sm" data-meal-id="{{ meal.id }}">Accept</button>
+															<a href="{{ path('request_delete', {'id': meal.id}) }}" class="btn btn-danger btn-sm refuse-link">Refuse</a>
+														</td>
+													</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</div>
+
+									<button type="submit" class="btn btn-danger mt-3" id="deleteMultipleBtn">Delete selected requests</button>
+									<a href="{{ path('request_create') }}" class="btn btn-dark mt-3">
+										New request
+										<i class="fa-solid fa-plus fa-lg p-1" style="color: #ffffff;"></i>
+									</a>
+								</form>
+
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.getElementById('selectAll').addEventListener('change', function () {
+document.querySelectorAll('.logCheckbox').forEach(checkbox => checkbox.checked = this.checked);
+});
+
+document.getElementById('deleteMultipleBtn').addEventListener('click', function (event) {
+event.preventDefault();
+const selectedMeals = document.querySelectorAll('.logCheckbox:checked');
+if (selectedMeals.length === 0) {
+Swal.fire({title: 'No meals selected!', text: "Please select at least one meal to delete.", icon: 'warning', confirmButtonColor: '#09122C'});
+return;
+}
+
+const form = document.getElementById('deleteLogsForm');
+
+Swal.fire({
+title: 'Delete selected meals?',
+text: "This action cannot be undone!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Yes, delete them!',
+cancelButtonText: 'Cancel'
+}).then(function (result) {
+if (result.isConfirmed) {
+form.submit();
+}
+});
+});
+
+$(document).ready(function () {
+if (!$.fn.DataTable.isDataTable('#datatable')) {
+$('#datatable').DataTable({
+lengthMenu: [
+4, 8, 15
+],
+pageLength: 4
+});
+}
+
+// Accept confirmation (redirect)
+document.querySelectorAll('#datatable tbody .btn-success').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault();
+let mealId = this.getAttribute('data-meal-id');
+let validateUrl = `/request/accept/${mealId}`;
+
+Swal.fire({
+title: 'Accept request?',
+text: "A new meal will be created with the same details!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#1fcf51',
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, Accept it!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+window.location.href = validateUrl;
+}
+});
+});
+});
+
+// Refuse confirmation (redirect)
+document.querySelectorAll('.refuse-link').forEach(link => {
+link.addEventListener('click', function (event) {
+event.preventDefault();
+const refuseUrl = this.getAttribute('href');
+
+Swal.fire({
+title: 'Refuse request?',
+text: "This request will be deleted and cannot be recovered.",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Yes, refuse it!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+window.location.href = refuseUrl;
+}
+});
+});
+});
+});
+	</script>
+{% endblock %}

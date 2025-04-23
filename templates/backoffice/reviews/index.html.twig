@@ -1,0 +1,133 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Reviews
+{% endblock %}
+
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<!-- Include SweetAlert -->
+	<div class="container-scroller" style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel col-" style="position:relative">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<h1 class="pb-2" style="color:black">Reviews</h1>
+					<form id="deleteLogsForm" action="{{ path('reviewDeleteMultiple') }}" method="POST">
+						<div class='mb-1 ' style='display:flex;justify-content:space-between;align-items:center;'>
+							<div style='display:flex;align-items:center;gap:5px'>
+								<input type="checkbox" id="selectAll" style='width:18px;height:18px'/>
+								<label for="selectAll">Select All</label>
+							</div>
+							<div style='display:flex;align-items:center;gap:5px'>
+
+								<button type="submit" class="btn btn-danger mt-3" id="deleteMultipleBtn">
+									<i class="fas fa-trash"></i>
+									Delete selected reviews</button>
+
+							</div>
+						</div>
+
+						<div class="row" style='display: flex; justify-content: center; align-items: center;'>
+
+
+							{% for rating in reviews %}
+
+								<div class=" col-xl-4 col-lg-6  col-md-5 col-sm-7 col-12 p-1">
+									<div class="single-testimonial-box">
+										<div class="testimonial-description">
+											<div class="testimonial-info">
+												<div class="testimonial-img">
+													<img src="{{ asset('images/visitor.png') }}" alt="visitor" width='80px'>
+												</div>
+												<div class="testimonial-person pt-2 col-12">
+													<h2 style='font-size:1rem;position:relative'>{{ rating.firstname }}
+														{{ rating.lastname }}
+														<div class="d-flex" style='position:absolute;right:42px;top:5px;align-items:center;gap:4px'>
+
+															<span style='font-size:.74rem;'>{{ rating.date|date('d-m-Y') }}
+															</span>
+															<input type="checkbox" name="reviewsToDelete[]" value="{{ rating.id }}" class="logCheckbox" style='width:16px;height:16px'>
+														</div>
+
+													</h2>
+
+													<h2>{{ rating.email }}</h2>
+
+													<div class="testimonial-person-star">
+														{% for i in 1..rating.stars %}
+															<i class="fa fa-star"></i>
+														{% endfor %}
+
+													</div>
+												</div>
+											</div>
+											<div class="testimonial-comment p-2">
+												<p>{{ rating.description }}</p>
+											</div>
+
+										</div>
+										<form action="{{ path('reviews_delete', {'id': rating.id}) }}" method="POST" style="display: inline;">
+											<input type="hidden" name="_method" value="DELETE">
+											<button type="submit" class="btn btn-sm btn-danger">
+												<i class="fas fa-trash"></i>
+											</button>
+										</form>
+									</div>
+								</div>
+							{% endfor %}
+
+
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.getElementById('selectAll').addEventListener('change', function () {
+document.querySelectorAll('.logCheckbox').forEach(cb => cb.checked = this.checked);
+});
+document.querySelectorAll('.btn-danger').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault(); // Prevent form submission for now
+
+Swal.fire({
+title: 'Delete this review?',
+text: "You won't be able to revert this!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, delete it!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) { // If confirmed, submit the form
+this.closest('form').submit();
+}
+});
+});
+});
+
+$(document).ready(function () {
+$('#datatable').DataTable({
+lengthMenu: [
+4, 8, 15
+],
+pageLength: 4
+});
+});
+	</script>
+
+{% endblock %}

@@ -1,0 +1,255 @@
+<nav class="sidebar sidebar-offcanvas pt-4" id="sidebar">
+	<ul
+		class="nav">
+		<!-- Dashboard Section -->
+		<li class="nav-item">
+			<a class="nav-link" href="{{path('dashboard') }}" aria-expanded="false" aria-controls="auth">
+				<i class="fa-solid fa-folder fa-lg" style="color: #ffffff;"></i>
+				<span class="menu-title m-2">Dashboard</span>
+			</a>
+		</li>
+
+		<!-- Meals Section -->
+		{% set showMealSection = false %}
+		{% set showCreateMeal = false %}
+		{% set showMealList = false %}
+
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name == 'ADDMEAL' %}
+				{% set showCreateMeal = true %}
+			{% elseif role.name in ['DELETEMEAL', 'VALIDATEMEAL', 'UPDATEMEAL'] %}
+				{% set showMealList = true %}
+			{% endif %}
+		{% endfor %}
+
+		{% if showCreateMeal or showMealList %}
+			<li class="nav-item">
+				<a class="nav-link" data-bs-toggle="collapse" href="#ul1" aria-expanded="false" aria-controls="ul1">
+					<i class="fa-solid fa-utensils fa-xl" style="color: #ffffff;"></i>
+					<span class="menu-title m-2">Meals</span>
+					<i class="menu-arrow"></i>
+				</a>
+				<div class="collapse" id="ul1">
+					<ul class="nav flex-column sub-menu">
+						{% if showMealList %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('meal_index') }}">Meals list</a>
+							</li>
+						{% endif %}
+						{% if showCreateMeal %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('meal_create') }}">New Meal</a>
+							</li>
+						{% endif %}
+					</ul>
+				</div>
+			</li>
+		{% endif %}
+
+		<!-- Requests Section -->
+		{% set showRequestSection = false %}
+		{% set showCreateRequest = false %}
+		{% set showRequestList = false %}
+
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name == 'ADDREQUEST' %}
+				{% set showCreateRequest = true %}
+			{% elseif role.name in ['DELETEREQUEST', 'ACCEPTREQUEST', 'REFUSEREQUEST'] %}
+				{% set showRequestList = true %}
+			{% endif %}
+		{% endfor %}
+
+		{% if showCreateRequest or showRequestList %}
+			<li class="nav-item">
+				<a class="nav-link" data-bs-toggle="collapse" href="#ul6" aria-expanded="false" aria-controls="ul6">
+					<i class="fa-solid fa-file-lines fa-xl" style="color: #ffffff;"></i>
+					<span class="menu-title m-2">Requests</span>
+					<i class="menu-arrow"></i>
+				</a>
+
+				<div class="collapse" id="ul6">
+					<ul class="nav flex-column sub-menu">
+						{% if showRequestList %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('request_index') }}">Requests list</a>
+							</li>
+						{% endif %}
+						{% if showCreateRequest %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('request_create') }}">New Request</a>
+							</li>
+						{% endif %}
+					</ul>
+				</div>
+			</li>
+		{% endif %}
+
+		<!-- Discounts Section -->
+		{% set showLi = false %}
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name in ['ADDDISCOUNT', 'DELETEDISCOUNT','VALIDATEDISCOUNT','UPDATEDISCOUNT'] %}
+				{% set showLi = true %}
+			{% endif %}
+		{% endfor %}
+		{% if showLi %}
+			<li class="nav-item">
+				<a class="nav-link" href="{{path('discount_index') }}" aria-expanded="false" aria-controls="auth">
+					<i class="fa-solid fa-percent fa-lg" style="color: #FFD43B;"></i>
+					<span class="menu-title m-2">Discounts</span>
+				</a>
+			</li>
+		{% endif %}
+
+		<!-- Reviews Section -->
+		{% set showLi = false %}
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name in ['DELETEREVIEW'] %}
+				{% set showLi = true %}
+			{% endif %}
+		{% endfor %}
+		{% if showLi %}
+			<li class="nav-item">
+				<a class="nav-link" href="{{path('reviews_index') }}">
+					<i class="fa-solid fa-star fa-lg " style="color: #ffffff;"></i>
+					<span class="menu-title m-2">Reviews</span>
+				</a>
+			</li>
+		{% endif %}
+
+		<!-- Users Section -->
+		{% set showUserSection = false %}
+		{% set showCreateUser = false %}
+		{% set showUserList = false %}
+
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name == 'ADDUSER' %}
+				{% set showCreateUser = true %}
+			{% elseif role.name in ['DELETEUSER', 'UPDATEUSER', 'VALIDATEUSER'] %}
+				{% set showUserList = true %}
+			{% endif %}
+		{% endfor %}
+
+		{% if showCreateUser or showUserList %}
+			<li class="nav-item">
+				<a class="nav-link" data-bs-toggle="collapse" href="#ul3" aria-expanded="false" aria-controls="ul3">
+					<i class="fa-solid fa-user fa-lg" style="color: #ffffff;"></i>
+					<span class="menu-title m-2">Users</span>
+					<i class="menu-arrow"></i>
+				</a>
+				<div class="collapse" id="ul3">
+					<ul class="nav flex-column sub-menu">
+						{% if showUserList %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('admin_index') }}">Users list</a>
+							</li>
+						{% endif %}
+						{% if showCreateUser %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('admin_create') }}">New User</a>
+							</li>
+						{% endif %}
+					</ul>
+				</div>
+			</li>
+		{% endif %}
+
+		<!-- Profile / Roles Section -->
+		{% set showProfileSection = false %}
+		{% set showCreateProfile = false %}
+		{% set showProfileList = false %}
+
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name == 'ADDPROFILE' %}
+				{% set showCreateProfile = true %}
+			{% elseif role.name in ['DELETEPROFILE', 'VALIDATEPROFILE', 'UPDATEPROFILE'] %}
+				{% set showProfileList = true %}
+			{% endif %}
+		{% endfor %}
+
+		{% if showCreateProfile or showProfileList %}
+			<li class="nav-item">
+				<a class="nav-link" data-bs-toggle="collapse" href="#ul8" aria-expanded="false" aria-controls="ul8">
+					<i class="fa-solid fa-users-gear fa-lg" style="color: #ffffff;"></i>
+					<span class="menu-title m-2">Profiles / Set Roles</span>
+					<i class="menu-arrow"></i>
+				</a>
+
+				<div class="collapse" id="ul8">
+					<ul class="nav flex-column sub-menu">
+						{% if showProfileList %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('profile_index') }}">Profiles list</a>
+							</li>
+						{% endif %}
+						{% if showCreateProfile %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ path('profile_add') }}">New Profile</a>
+							</li>
+						{% endif %}
+					</ul>
+				</div>
+			</li>
+		{% endif %}
+
+		<!-- Log Section -->
+		{% set showLi = false %}
+		{% set roles = admin.profile.roles %}
+		{% for role in roles %}
+			{% if role.name in ['DELETELOG'] %}
+				{% set showLi = true %}
+			{% endif %}
+		{% endfor %}
+		{% if showLi %}
+			<li class="nav-item">
+				<a class="nav-link" href="{{ path('log_index') }}" aria-expanded="false" aria-controls="auth">
+					<i class="fa-solid fa-folder fa-lg" style="color: #ffffff;"></i>
+					<span class="menu-title m-2">Logs</span>
+				</a>
+			</li>
+		{% endif %}
+
+		<!-- My Profile Section -->
+		<li class="nav-item">
+			<a class="nav-link" href="{{ path('admin_edit', { 'id': admin.id }) }}">
+				<i class="fa-solid fa-lock fa-lg" style="color: #ffffff;"></i>
+				<span class="menu-title m-2">My Profile / Roles</span>
+			</a>
+		</li>
+
+		<!-- Logout Section -->
+		<li class="nav-item">
+			<a class="nav-link" href="{{ path('admin_logout') }}">
+				<i class="fa-solid fa-right-from-bracket fa-lg" style="color: #ffffff;"></i>
+				<span class="menu-title m-2">Logout</span>
+			</a>
+		</li>
+		<li class="nav-item sidebar-user-actions ">
+			<div class="user-details">
+				<div class="d-flex justify-content-between align-items-center  pl-1">
+					<div>
+
+						<div class="d-flex align-items-center mb-2">
+
+							<div class="sidebar-profile-img">
+								<img src="{{ asset('images/me.jpg') }}" style='width:35px; border-radius:50%' alt="image">
+							</div>
+							<div class="sidebar-profile-text">
+
+								<a href="" style="color:white">
+									<u>NizarTarik.com</u>
+								</a>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</li>
+	</ul>
+</nav>

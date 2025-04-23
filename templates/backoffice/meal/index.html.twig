@@ -1,0 +1,231 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Meals
+{% endblock %}
+
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+
+	<div class="container-scroller" style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel" style="position:relative">
+				<div
+					class="content-wrapper">
+
+					{# Flash Messages #}
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+
+					<h1 class="pb-2" style="color:black">Meals list</h1>
+
+					<div class="col-lg-12 grid-margin stretch-card">
+						<div class="card">
+							<div class="card-body">
+								<form id="deleteLogsForm" action="{{ path('mealDeleteMultiple') }}" method="POST">
+									<div>
+										<input type="checkbox" id="selectAll"/>
+										<label for="selectAll">Select All</label>
+									</div>
+
+									<div style="max-height:540px; overflow-y: auto;">
+										<table class="table table-striped" id="datatable">
+											<thead>
+												<tr>
+													<th></th>
+													<th>Image</th>
+													<th>Name</th>
+													<th>Discount</th>
+													<th>Price</th>
+													<th>Action</th>
+												</tr>
+											</thead>
+											<tbody>
+												{% for meal in meals %}
+													<tr>
+														<td>
+															<input type="checkbox" name="mealsToDelete[]" value="{{ meal.id }}" class="logCheckbox">
+														</td>
+														<td class="text-center">
+															<img src="/{{ meal.image }}" alt="{{ meal.name }}" style="width: 75px; height:75px; border-radius: 13%; object-fit: cover;">
+														</td>
+														<td>
+															{{ meal.name }}
+															<span class="text-primary font-weight-bold">({{ meal.type }})</span>
+														</td>
+														<td>
+															{% if meal.discount %}
+																{% set discountPercentage = ((meal.price - meal.discount.discountprice) / meal.price) * 100 %}
+																<span class="text-primary font-weight-bold">({{ discountPercentage|round(2) }}%)</span>
+															{% else %}
+																<span class="font-weight-bold">None</span>
+															{% endif %}
+														</td>
+														<td>
+															{% if meal.discount %}
+																<span class="text-success font-weight-bold">only
+																	{{ meal.discount.discountprice }}$</span>
+																<span class="text-danger font-weight-bold text-decoration-line-through">{{ meal.price }}$</span>
+																{% if meal.discount.remainingDays is defined %}
+																	<p class="text-warning">({{ meal.discount.remainingDays }}
+																		days Left)</p>
+																{% endif %}
+															{% else %}
+																<span class="font-weight-bold">{{ meal.price }}$</span>
+															{% endif %}
+														</td>
+														<td>
+															<div class="d-grid gap-2" style="grid-template-columns: repeat(2, 1fr); display: grid;">
+																{% if meal.status == 0 %}
+																	<a href="{{ path('meal_edit', { 'id': meal.id }) }}" class="btn btn-sm btn-dark">
+																		<i class="mdi mdi-lead-pencil"></i>
+																		Edit
+																	</a>
+
+																	{% if meal.discount %}
+																		<a href="{{ path('discount_edit', { 'id': meal.id }) }}" class="btn btn-warning btn-sm">
+																			Edit discount
+																			<i class="fa-solid fa-percent"></i>
+																		</a>
+																	{% else %}
+																		<a href="{{ path('discount_create', { 'id': meal.id }) }}" class="btn btn-warning btn-sm">
+																			Set discount
+																			<i class="fa-solid fa-percent"></i>
+																		</a>
+																	{% endif %}
+
+																	<form action="{{ path('meal_validate', { 'id': meal.id }) }}" method="POST" style="display: contents;">
+																		<button type="submit" class="btn btn-success btn-sm">
+																			Validate
+																		</button>
+																	</form>
+																{% else %}
+																	<button class="btn btn-outline-success btn-sm" disabled>
+																		Validated
+																	</button>
+																{% endif %}
+
+																<form action="{{ path('meal_delete', { 'id': meal.id }) }}" method="POST" style="display: contents;">
+																	<input type="hidden" name="_method" value="DELETE">
+																	<button type="submit" class="btn btn-sm btn-danger">
+																		Delete
+																		<i class="fas fa-trash"></i>
+																	</button>
+																</form>
+															</div>
+														</td>
+													</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</div>
+
+									<button type="submit" class="btn btn-danger mt-3" id="deleteMultipleBtn">Delete selected meals</button>
+								</form>
+
+								<a href="{{ path('meal_create') }}" class="btn btn-sm btn-dark mt-3" style='background-color:green;border:none'>
+									New meal
+									<i class="fa-solid fa-plus fa-lg p-1 text-white"></i>
+								</a>
+							</div>
+						</div>
+					</div>
+
+					<script>
+						document.addEventListener('DOMContentLoaded', function () {
+new DataTable('#datatable', {
+"pageLength": 4, // Default number of rows per page
+"lengthMenu": [4, 8, 15] // Options to choose from: 4, 8, and 15
+});
+});
+					</script>
+
+					<script>
+						document.addEventListener('DOMContentLoaded', function () {
+new DataTable('#datatable');
+});
+					</script>
+
+					<script>
+						document.getElementById('selectAll').addEventListener('change', function () {
+document.querySelectorAll('.logCheckbox').forEach(cb => cb.checked = this.checked);
+});
+
+document.getElementById('deleteMultipleBtn').addEventListener('click', function (event) {
+event.preventDefault();
+const selected = document.querySelectorAll('.logCheckbox:checked');
+if (selected.length === 0) {
+Swal.fire({title: 'No meals selected!', text: 'Please select at least one meal.', icon: 'warning'});
+return;
+}
+Swal.fire({
+title: 'Delete selected meals?',
+text: "This action cannot be undone!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Yes, delete them!',
+cancelButtonText: 'Cancel'
+}).then(result => {
+if (result.isConfirmed) {
+document.getElementById('deleteLogsForm').submit();
+}
+});
+});
+
+document.querySelectorAll('#datatable tbody .btn-danger').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault();
+Swal.fire({
+title: 'Delete meal?',
+text: "This action cannot be undone!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#d33',
+cancelButtonColor: '#6c757d',
+confirmButtonText: 'Yes, delete it!',
+cancelButtonText: 'Cancel'
+}).then(result => {
+if (result.isConfirmed) {
+this.closest('form').submit();
+}
+});
+});
+});
+
+document.querySelectorAll('#datatable tbody .btn-success').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault();
+let form = this.closest('form');
+Swal.fire({
+title: 'Validate meal?',
+text: "Do you want to validate this meal?",
+icon: 'question',
+showCancelButton: true,
+confirmButtonColor: '#1fcf51',
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, validate!',
+cancelButtonText: 'Cancel'
+}).then(result => {
+if (result.isConfirmed) {
+form.submit();
+}
+});
+});
+});
+					</script>
+
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

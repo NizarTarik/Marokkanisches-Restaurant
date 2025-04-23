@@ -1,0 +1,319 @@
+{% extends 'backoffice/base.html.twig' %}
+
+{% block title %}Edit Meal
+{% endblock %}
+
+{% block body %}
+	<style>
+		body {
+			font-family: "Oxygen", sans-serif;
+		}
+
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+
+		.card_image img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+
+		.card_content {
+			position: relative;
+			padding: 5px 12px 32px 24px;
+			margin: 16px 8px 8px 0;
+			max-height: 230px;
+			overflow-y: scroll;
+		}
+
+		.card_content::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		.card_content::-webkit-scrollbar-track {
+			box-shadow: 0;
+			border-radius: 0;
+		}
+
+		.card_content::-webkit-scrollbar-thumb {
+			background: #c89b3f;
+			border-radius: 15px;
+		}
+
+		.card_title {
+			position: relative;
+			margin: 0 0 18px;
+			padding-bottom: 3px;
+			text-align: center;
+			font-size: 20px;
+			font-weight: 700;
+		}
+
+		.card_title::after {
+			position: absolute;
+			display: block;
+			width: 50px;
+			height: 2px;
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			background-color: #c89b3f;
+			content: "";
+		}
+
+		hr {
+			margin: 24px auto;
+			width: 50px;
+			border-top: 2px solid #c89b3f;
+		}
+
+		.card_text p {
+			font-size: 14px;
+			line-height: 1.5;
+		}
+
+		.card_text p:last-child {
+			margin: 0;
+		}
+	</style>
+	<div class="container-scroller " style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper ">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+
+					<div
+						class="row d-flex">
+						<!-- Card Section -->
+						<div class="col-xl-4 col-lg-6 col-md-5 col-sm-5 ">
+							<div class="cards_item">
+								<div class="card">
+									<div class="card_image">
+										<img src="/{{ meal.image }}" alt="{{ meal.name }}"/>
+									</div>
+
+									<div class="card_content">
+										<h2 class="card_title">{{ meal.name }}<p class="pt-1">{{ meal.type }}</p>
+										</h2>
+
+										<div class="card_text">
+											{% if meal.discount %}
+												<div>
+
+													<span class=" font-weight-bold">
+														{{ meal.discount.discountprice }}$</span>
+													<span class="text-danger font-weight-bold text-decoration-line-through">{{ meal.price }}$</span>
+												</div>
+												{% if meal.discount.remainingDays is defined %}
+													<p class="text-warning">
+														Discound ends in :
+														{{ meal.discount.remainingDays }}
+														day
+													</p>
+												{% else %}
+
+													<span class="font-weight-bold ">{{ meal.price }}$</span>
+												{% endif %}
+
+
+											{% endif %}
+											<p>{{ meal.description }}</p>
+											<hr/>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<!-- Form Section -->
+						<div class="col-xl-8 col-lg-6 col-md-7 col-sm-7 mb-4">
+							<div class="card">
+								<div class="card-body">
+									<h4 class="card-title">Modify Meal</h4>
+
+									<form action="{{ path('meal_update', { 'id': meal.id }) }}" method="POST">
+										<input type="hidden" name="_csrf_token" value="{{ csrf_token('meal_create') }}">
+										<div class="form-group">
+											<label for="name" class="pt-1">Name</label>
+											<input type="text" class="form-control" name="name" value="{{ meal.name }}" required/>
+										</div>
+										<div class="form-group col-12 d-flex" style="align-items:center;">
+											<label for="price" id='discountLabel'>
+												{% if meal.discount %}
+													Remove discount
+												{% else %}
+													Set discount
+												{% endif %}
+											</label>
+											<input type="checkbox" name="setdiscount" id="display" {% if meal.discount %} checked {% endif %} style="width:17px;height:17px; margin: 0 0 5px 5px"/>
+										</div>
+
+										<!-- Discount Details Section with a single parent ID -->
+										<div class="row d-flex" style="justify-content-between; align-items:center;">
+											<div class="form-group col-xl-3 col-lg-6" id="d1" style="display:{% if meal.discount %} block {% else %} none {% endif %};">
+												<label for="startDate">
+													Start date</label>
+												<input type="date" class="form-control" {% if meal.discount %} value="{{meal.discount.startdate|date('Y-m-d') }}" {% else %} id="startdate" {% endif %} name="startdate" required/>
+											</div>
+											<div class="form-group col-xl-3 col-lg-6" id="d2" style="display:{% if meal.discount %} block {% else %} none {% endif %};">
+												<label for="finalDate">
+													End date
+												</label>
+												<input type="date" class="form-control" name="finaledate" required {% if meal.discount %} value="{{meal.discount.finaldate|date('Y-m-d') }}" {% endif %}/>
+											</div>
+											<div class="form-group col-xl-3 col-lg-6" id="d3" style="display:{% if meal.discount %} block {% else %} none {% endif %};">
+												<label for="price">New price $</label>
+												<input type="number" class="form-control" name="priceForDiscount" placeholder="Price" id="priceForDiscount" min="0" required {% if meal.discount %} value="{{meal.discount.discountprice}}" {% endif %}/>
+											</div>
+											<div class="form-group col-xl-3 col-lg-6 " id="d4" style="display:{% if meal.discount %} block {% else %} none {% endif %};">
+												<label for="discount">Discount
+													<span id="discountPercent" style="color: green;font-weight:bold"></span>
+												</label>
+												<div>
+													<input type="text" class="form-control" style="font-weight:bold;color:red" name="discount" id="discount" disabled/>
+												</div>
+											</div>
+										</div>
+										<div class="row d-flex" style=" justify-content-between;align-items:center">
+											<div class="form-group col-3">
+												<label for="type">Type</label>
+												<select name="type" id="type" class="form-control" required>
+													<option value="Breakfast" {% if meal.type == 'Breakfast' %} selected {% endif %}>Breakfast</option>
+													<option value="Lunch" {% if meal.type == 'Lunch' %} selected {% endif %}>Lunch</option>
+													<option value="Dinner" {% if meal.type == 'Dinner' %} selected {% endif %}>Dinner</option>
+													<option value="dessert" {% if meal.type == 'dessert' %} selected {% endif %}>Dessert</option>
+
+												</select>
+											</div>
+											<div class="form-group col-4">
+												<label for="price">Price $
+												</label>
+												<input type="number" class="form-control" id="priceInput" value="{{ meal.price }}" name="price" placeholder="Price" min="0" required/>
+											</div>
+											<div class="form-group col-5">
+												<label for="img" class="">Image</label>
+												<input type="file" required name="img" id="img" class="form-control"/>
+											</div>
+
+										</div>
+										<div class="form-group">
+											<label for="description">Description des recettes</label>
+											<textarea class="form-control" name="description" rows="4" placeholder="Describe the recipe" required>{{ meal.description }}</textarea>
+										</div>
+
+
+										<a href="{{ path('meal_index') }}">
+											<button type="button" class="btn btn-light">Cancel</button>
+										</a>
+										<button type="submit" class="btn btn-dark me-2" id="modifyMealBtn">Modify</button>
+										<a href="{{ path('discount_index') }}">
+											<button type="button" style="color:black;background-color:rgb(227, 163, 35)" class="btn">
+
+												Discounts list
+												<i class="fa-solid fa-percent" style="color:rgb(0, 0, 0);margin-left:3px;"></i>
+											</button>
+										</a>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		const priceInput = document.getElementById('priceInput');
+const priceForDiscount = document.getElementById('priceForDiscount');
+const discountField = document.getElementById('discount');
+const discountPercent = document.getElementById('discountPercent');
+
+// Function to calculate discount
+function updateDiscount() {
+const price = parseFloat(priceInput.value) || 0;
+const discountPrice = parseFloat(priceForDiscount.value) || 0;
+
+if (price > 0 && discountPrice > 0 && discountPrice < price) {
+const discountAmount = price - discountPrice;
+const discountPercentValue = ((discountAmount / price) * 100).toFixed(2); // Calculate percentage
+discountField.value = `-${
+discountAmount.toFixed(2)
+}`;
+discountPercent.textContent = `(${discountPercentValue}%)`; // Display percentage in green
+} else {
+discountField.value = "-0";
+discountPercent.textContent = "(0%)";
+}
+}
+
+// Run function when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+updateDiscount();
+});
+
+// Listen for input changes
+priceInput.addEventListener('input', updateDiscount);
+priceForDiscount.addEventListener('input', updateDiscount);
+
+const checkbox = document.getElementById('display');
+const discountLabel = document.getElementById('discountLabel');
+const d1 = document.getElementById('d1');
+const d2 = document.getElementById('d2');
+const d3 = document.getElementById('d3');
+const d4 = document.getElementById('d4');
+const hasDiscount = {{ meal.discount ? 'true' : 'false' }};
+checkbox.addEventListener('change', function () {
+if (checkbox.checked) {
+discountLabel.innerHTML = 'Remove discount';
+d1.style.display = 'block';
+d2.style.display = 'block';
+d3.style.display = 'block';
+d4.style.display = 'block';
+} else {
+discountLabel.innerHTML = 'Set discount';
+d1.style.display = 'none';
+d2.style.display = 'none';
+d3.style.display = 'none';
+d4.style.display = 'none';
+}
+});
+
+document.getElementById('startdate').valueAsDate = new Date();
+
+document.getElementById('modifyMealBtn').addEventListener('click', function (event) {
+event.preventDefault(); // Prevent form submission for now
+
+Swal.fire({
+title: 'Modify?',
+text: 'You can back and modify any time',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#9AA6B2',
+confirmButtonText: 'Yes, modify!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) { // If confirmed, submit the form
+this.closest('form').submit();
+}
+});
+});
+	</script>
+{% endblock %}

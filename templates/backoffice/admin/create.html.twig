@@ -1,0 +1,141 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Create User
+{% endblock %}
+{% block body %}
+	<div class="container-scroller" style="margin-top:65px">
+		<div
+			class=" container-fluid page-body-wrapper">
+			<!-- sidebar.html -->
+
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel">
+
+				<div
+					class="content-wrapper">
+					{# Flash Messages Section #}
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show " role="alert" style="position:fixed;right:15px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<div class="d-flex justify-content-between">
+						<h1 class="mb-5" style="color:black">
+							Create User
+						</h1>
+						<a class="nav-link" href="{{path('profile_add')}}">
+							<button type="submit" class="btn btn-dark me-2 ">New Profile
+								<i class="fa-solid fa-plus fa-lg m-1" style="color: #ffffff;"></i>
+							</button>
+						</a>
+					</div>
+					<div class="col-lg-12 grid-margin stretch-card">
+
+						<form class="forms-sample col-10" style="margin:auto" method="POST" enctype="multipart/form-data" action="{{path('admin_store')}}">
+							<div class="row">
+								<div class="form-group row col-6">
+									<label for="firstname" class="col-sm-3 col-form-label">First Name</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" id="firstname" name="firstname" placeholder="First Name" required/>
+									</div>
+								</div>
+								<div class="form-group row col-6">
+									<label for="lastname" class="col-sm-3 col-form-label">Last Name</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" id="lastname" name="lastname" placeholder="Last Name" required/>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="form-group row col-6">
+									<label for="email" class="col-sm-3 col-form-label">Email</label>
+									<div class="col-sm-9">
+										<input type="email" class="form-control " id="email" name="email" placeholder="Email" required/>
+									</div>
+								</div>
+								<div class="form-group row col-6">
+									<label for="address" class="col-sm-3 col-form-label">Address</label>
+									<div class="col-sm-9">
+										<input type="text" class="form-control" id="confirm_password" name="address" placeholder="Address" required/>
+									</div>
+								</div>
+
+							</div>
+							<div class="row">
+								<div class="form-group row col-6">
+									<label for="password" class="col-sm-3 col-form-label">Password</label>
+									<div class="col-sm-9">
+										<input type="password" class="form-control" id="password" name="password" placeholder="Password" required/>
+									</div>
+								</div>
+								<div class="form-group row col-6">
+									<label for="confirm_password" class="col-sm-3 col-form-label">Confirm Password</label>
+									<div class="col-sm-9">
+										<input type="password" class="form-control" id="confirm_password" name="Confirmpassword" placeholder="Confirm Password" required/>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+
+								<div class="form-group row col-6">
+									<label for="confirm_password" class="col-sm-3 col-form-label">Phone</label>
+									<div class="col-sm-9">
+										<input type="tel" class="form-control" name="phone" placeholder="Phone" required pattern="[0-9]+"/>
+									</div>
+								</div>
+								<div class="form-group row col-6">
+									<label for="img" class="col-sm-3 col-form-label">Profile Image</label>
+									<div class="col-sm-9">
+										<input type="file" class="form-control" id="img" name="img" accept="image/png, image/jpeg, image/jpg"/>
+									</div>
+								</div>
+
+							</div>
+							<div class="form-group row col-6">
+								<label for="confirm_password" class="col-sm-3 col-form-label">Profile</label>
+								<div class="col-sm-9">
+									<select class='select2' class="form-control" id="profil" name="profile" onchange="restorePero()" style="width: 100%;">
+										{% for p in profils %}
+											<option value="{{p.id}}">{{p.name}}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+
+							<button class="btn btn-light" type="reset">Cancel</button>
+
+							<button type="submit" class="btn btn-dark me-2" id="AddUserBtn">Create User
+								<i class="fa-solid fa-plus fa-lg m-1" style="color: #ffffff;"></i>
+							</button>
+
+						</form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+
+		document.getElementById('AddUserBtn').addEventListener('click', function (event) {
+event.preventDefault();
+Swal.fire({
+title: 'Create user?',
+text: 'Do you want to create this user?',
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#9AA6B2',
+confirmButtonText: 'Yes, create',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+this.closest('form').submit();
+}
+});
+});
+	</script>
+{% endblock %}

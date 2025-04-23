@@ -1,0 +1,175 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}Create Request
+{% endblock %}
+{% block body %}
+	<div class="container-scroller  " style="margin-top:65px">
+
+		<div class="container-fluid page-body-wrapper ">
+
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div
+				class="main-panel ">
+
+				{# Flash Messages Section #}
+
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class=" col-md-3 col-sm-5  alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<h1 class="pb-2" style="color:black">
+						Create Request
+					</h1>
+					<div class="row">
+
+						<div class="col-md-12">
+							<div class="tab-content tab-transparent-content">
+								<div class="tab-pane fade show active" id="business-1" role="tabpanel" aria-labelledby="business-tab">
+									<div class="row">
+										<div class="col-xl-10 col-lg-9 col-sm-9" style="margin:auto">
+											<div class="col-12 grid-margin stretch-card">
+
+												<form class="forms-sample col-12" style="margin:auto" method="POST" action="{{ path('request_store') }}" enctype="multipart/form-data">
+													<input type="hidden" name="_csrf_token" value="{{ csrf_token('meal_create') }}">
+
+													<div class="form-group row">
+														<label for="name" class="col-sm-3 col-form-label">Name</label>
+														<div class="col-sm-9">
+															<input type="text" id="name" class="form-control" name="name" placeholder="Name" required/>
+														</div>
+													</div>
+
+													<div class="form-group row">
+														<label for="type" class="col-sm-3 col-form-label">Type</label>
+														<div class="col-sm-9">
+															<select name="type" id="type" class="form-control" required>
+																<option value="Breakfast">Breakfast</option>
+																<option value="Lunch">Lunch</option>
+																<option value="Dinner">Dinner</option>
+																<option value="Dessert">Dessert</option>
+															</select>
+														</div>
+													</div>
+
+													<div class="form-group row">
+														<label for="price" class="col-sm-3 col-form-label">Price ($)</label>
+														<div class="col-sm-9">
+															<input type="number" id="priceInput" class="form-control" name="price" placeholder="Price" min="0" required/>
+														</div>
+													</div>
+
+													<div class="form-group row">
+														<label for="description" class="col-sm-3 col-form-label">Description</label>
+														<div class="col-sm-9">
+															<textarea class="form-control" name="description" id="description" rows="4" placeholder="Describe the recipe" required></textarea>
+														</div>
+													</div>
+													<div class="form-group row">
+														<label for="img" class="col-sm-3 col-form-label">Image</label>
+														<div class="col-sm-9">
+															<input type="file" name="img" id="img" class="form-control" accept="image/png, image/jpeg"/>
+														</div>
+													</div>
+													<div class="form-group row d-flex" style="align-items: center;">
+														<label for="img" class="col-sm-3 col-form-label">Add discount</label>
+														<div class="col-sm-9">
+															<input type="checkbox" name="setdiscount" id="display" style="width:17px;height:17px; margin: 0 0 5px 5px"/>
+														</div>
+													</div>
+													<!-- Discount Details Section with a single parent ID -->
+													<div class="row d-flex" style="justify-content-between; align-items:center;">
+														<div class="form-group col-xl-3 col-lg-6" style="display:none" id="d1">
+															<label for="startDate">Discount Start</label>
+															<input type="date" class="form-control" id="startdate" name="startdate" required/>
+														</div>
+														<div class="form-group col-xl-3 col-lg-6" style="display:none" id="d2">
+															<label for="finalDate">Discount End</label>
+															<input type="date" class="form-control" name="finaledate" required/>
+														</div>
+														<div class="form-group col-xl-3 col-lg-6" style="display:none" id="d3">
+															<label for="price">Set Price</label>
+															<input type="number" class="form-control" name="priceForDiscount" placeholder="Price for discount" id="priceForDiscount" min="0" required/>
+														</div>
+														<div class="form-group col-xl-3 col-lg-6 " style="display:none" id="d4">
+															<div style="display:flex;align-items:center;gap:6px">
+																<label for="discount">Discount</label>
+																<span id="discountPercent" style="color: green; font-weight: bold;margin-bottom:7px"></span>
+															</div>
+															<!-- Display percentage in green -->
+															<input type="text" class="form-control" style="font-weight: bold; color: red" name="discount" value="-0" id="discount" disabled/>
+														</div>
+													</div>
+
+
+													<button class="btn btn-light" type="reset">Cancel</button>
+
+													<button type="submit" class="btn btn-primary me-2" id="createMealBtn">
+														Create
+														<i class="fa-solid fa-plus fa-lg m-1" style="color: #ffffff;"></i>
+													</button>
+												</form>
+
+
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- main-panel ends -->
+				</div>
+				<!-- page-body-wrapper ends -->
+			</div>
+			<script>
+				const priceInput = document.getElementById('priceInput');
+const priceForDiscount = document.getElementById('priceForDiscount');
+const discountField = document.getElementById('discount');
+const discountPercent = document.getElementById('discountPercent');
+
+// Function to calculate discount and percentage
+function updateDiscount() {
+const price = parseFloat(priceInput.value) || 0;
+const discountPrice = parseFloat(priceForDiscount.value) || 0;
+const discount = price - discountPrice;
+
+const discountPercentage = price > 0 ? ((discount / price) * 100).toFixed(2) : 0;
+discountField.value = discount > 0 && discountPrice > 0 ? '-' + discount : '-0';
+discountPercent.textContent = discountPercentage > 0 && discountPercentage < 100 ? "(" + discountPercentage + "%)" : "";
+}
+
+
+priceInput.addEventListener('input', updateDiscount);
+priceForDiscount.addEventListener('input', updateDiscount);
+
+priceInput.addEventListener('input', updateDiscount);
+priceForDiscount.addEventListener('input', updateDiscount);
+const checkbox = document.getElementById('display');
+const d1 = document.getElementById('d1');
+const d2 = document.getElementById('d2');
+const d3 = document.getElementById('d3');
+const d4 = document.getElementById('d4');
+
+// Add an event listener to the checkbox
+checkbox.addEventListener('change', function () { // Check if the checkbox is checked and toggle the visibility accordingly
+if (checkbox.checked) {
+d1.style.display = 'block';
+d2.style.display = 'block';
+d3.style.display = 'block';
+d4.style.display = 'block';
+} else {
+d1.style.display = 'none';
+d2.style.display = 'none';
+d3.style.display = 'none';
+d4.style.display = 'none';
+}
+});
+document.getElementById('startdate').valueAsDate = new Date();
+			</script>
+
+		{% endblock %}

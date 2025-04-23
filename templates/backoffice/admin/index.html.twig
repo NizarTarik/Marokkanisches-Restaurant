@@ -1,0 +1,164 @@
+{% extends 'backoffice/base.html.twig' %}
+{% block title %}
+	Users
+{% endblock %}
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.datatables.net/2.2.1/css/dataTables.dataTables.css"/>
+	<script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
+	<div class="container-scroller  " style="margin-top:65px">
+		<div class="container-fluid page-body-wrapper ">
+			{% include 'backoffice/layout/sidebar.html.twig' %}
+
+			<div class="main-panel col-" style="position:relative">
+				<div class="content-wrapper">
+					{% for type, messages in app.flashes %}
+						{% for message in messages %}
+							<div class="col-md-3 col-sm-5 alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert" style="position:fixed;top:75px;right:10px;z-index:1000">
+								{{ message }}
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+						{% endfor %}
+					{% endfor %}
+					<h1 class="pb-2" style="color:black">
+						Users List
+					</h1>
+
+					<div class="col-lg-12 grid-margin stretch-card">
+						<div class="card">
+							<div class="card-body">
+
+								<div style="max-height:540px; overflow-y: auto;">
+									<table class="table table-striped" id="datatable">
+										<thead>
+											<tr>
+												<th>Admin</th>
+												<th>Full Name</th>
+												<th>Profile</th>
+												<th>Email</th>
+												<th>Phone</th>
+												<th>Action</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for adm in admins %}
+												<tr>
+													<td style="display: flex; align-items: center; justify-content: center;">
+														<img src="/{{ adm.img }}" alt="{{ adm.firstname }}" style="width: 60px; height: 60px; border-radius: 20%;display-contents:cover;">
+													</td>
+													<td>
+
+														{{ adm.firstname }}
+														{{ adm.lastname }}
+														{% if adm.id == admin.id %}
+															<span style='border-radius:6px;color:white' class=' bg-danger p-1'>
+																My account</span>
+														{% endif %}
+													</td>
+													<td>
+														<span style="font-weight:bold">({{ adm.profile.name }})</span>
+													</td>
+													<td>{{ adm.email }}</td>
+													<td>{{ adm.phone }}
+													</td>
+
+
+													<td>
+														{% if adm.status == 0 %}
+
+															<button class="btn btn-success btn-sm" data-meal-id="{{ adm.id }}">
+																Validate
+															</button>
+															<a href="{{ path('admin_edit', { 'id': adm.id }) }}">
+																<button class="btn btn-sm btn-inverse-dark">
+																	<i class="mdi  mdi-lead-pencil"></i>
+																</button>
+															</a>
+
+														{% else %}
+															<button class="btn btn-success btn-sm" disabled>
+																Validated
+															</button>
+														{% endif %}
+														<form action="{{ path('admin_delete', {'id': adm.id}) }}" method="POST" style="display: inline;">
+															<input type="hidden" name="_method" value="DELETE">
+															<button type="submit" class="btn btn-sm btn-danger">
+																<i class="fas fa-trash"></i>
+
+															</button>
+														</form>
+													</td>
+												</tr>
+											</td>
+										</tbody>
+									</tr>
+
+								{% endfor %}
+							</tbody>
+						</table>
+						<a href="{{ path('admin_create', { 'id': admin.id }) }}">
+
+							<button type="submit" class="btn btn-dark me-2 ">New User
+								<i class="fa-solid fa-plus fa-lg m-1" style="color: #ffffff;"></i>
+							</button>
+
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div></div></div><script>document.querySelectorAll('#datatable tbody .btn-danger').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault(); // Prevent form submission for now
+
+Swal.fire({
+title: 'Delete user?',
+text: "You won't be able to revert this!",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#09122C',
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, delete it!',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) { // If confirmed, submit the form
+this.closest('form').submit();
+}
+});
+});
+});
+
+
+$(document).ready(function () {
+$('#datatable').DataTable({
+lengthMenu: [
+4, 8, 15
+],
+pageLength: 4
+});
+});
+
+// Validation confirmation (redirect instead of form submission)
+document.querySelectorAll('#datatable tbody .btn-success').forEach(button => {
+button.addEventListener('click', function (event) {
+event.preventDefault();
+
+let mealId = this.getAttribute('data-meal-id'); // Get meal ID from button attribute
+let validateUrl = `/user/validate/${mealId}`; // Adjust URL structure as per your route
+
+Swal.fire({
+title: 'Validate user?',
+text: "Do you want to validate this user?",
+icon: 'warning',
+showCancelButton: true,
+confirmButtonColor: '#1fcf51', // Success green color
+cancelButtonColor: '#d33',
+confirmButtonText: 'Yes, validate !',
+cancelButtonText: 'Cancel'
+}).then((result) => {
+if (result.isConfirmed) {
+window.location.href = validateUrl; // Redirect to validation URL
+}
+});
+});
+});</script>{% endblock %}
