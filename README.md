@@ -6,23 +6,12 @@ A website showcasing Moroccan cuisine with an admin dashboard for managing dishe
 
 ## 📑 Table of Contents
 
-- [🌟 Features](#-features)
 - [🔑 Login Information (Admin)](#-login-information-admin)
 - [👨‍🍳 Public Interface](#-public-interface)
 - [🔐 Admin Dashboard](#-admin-dashboard)
 - [🛠️ Technologies Used](#-technologies-used)
 - [🧪 Installation](#-installation)
 - [📸 Screenshots](#-screenshots)
-
----
-
-## 🌟 Features
-
-- Beautiful homepage introducing Moroccan cuisine
-- Interactive menu with traditional dishes (tagine, couscous, pastilla, etc.)
-- User registration and profile management
-- Customer reviews and contact form
-- Full admin dashboard to manage content and users
 
 ---
 
