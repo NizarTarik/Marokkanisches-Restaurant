@@ -1,7 +1,6 @@
 # Moroccan Restaurant Information Website 🇲🇦🍽️
 
-A dynamic website for showcasing a traditional Moroccan restaurant, with both public and admin interfaces.
-
+A website showcasing Moroccan cuisine with an admin dashboard for managing dishes, user profiles, and reviews.
 ## 📑 Table of Contents
 
 - [🌟 Features](#-features)
