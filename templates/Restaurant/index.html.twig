@@ -161,7 +161,7 @@
 												<span class="font-weight-bold pl-2">{{ meal.price }}$</span>
 											{% endif %}
 
-											<a href="#" class="btn btn-primary p-2">Order now</a>
+											<a href="#contact" style='text-decoration:none;color:white' class="btn btn-primary order-button p-3">Order Now</a>
 
 										</div>
 
@@ -215,7 +215,7 @@
 												<span class="shopping-cart">
 													<i class="fa fa-shopping-cart" aria-hidden="true"></i>
 												</span>
-												<span class="buy">Order Now</span>
+												<a href="#contact" style='text-decoration:none;color:white' class="order-button p-3">Order Now</a>
 											</button>
 										</div>
 									</div>
@@ -238,9 +238,7 @@
 							{% endfor %}
 
 						</div>
-						<a href='' style='display: block; width: fit-content; margin: 20px auto;'>
-							<button class=' btn bg-success p-4'>More</button>
-						</a>
+
 
 					</div>
 				</div>
@@ -291,19 +289,39 @@
 					</div>
 
 				</section>
-				<!--/.reviews-->
-				<!--reviews end -->
 
 
-				<!--/.counter-->
-				<!-- statistics end -->
+				<!-- Contact Section -->
+				<section id="contact" class="contact-section">
+					<div class="contact-box">
+						<h2>Contact Our Restaurant</h2>
+						<p>If you want to order something, call us, email us, or visit our location.</p>
 
+						<div class="contact-details">
+							<p>
+								<strong>Phone:</strong>
+								<a href="tel:+1234567890">+212 642621383</a>
+							</p>
+							<p>
+								<strong>Email:</strong>
+								<a href="mailto:info@restaurant.com">fakeEmail@restaurant.com</a>
+							</p>
+							<p>
+								<strong>Address:</strong>
+								1234 address exemple, Morocco</p>
+						</div>
 
-				<!--/.blog-->
-				<!--blog end -->
+						<div class="map-container">
+							<img src="/uploads/images/image.png" alt="" width='35%' style='text-align:center;'>
+						</div>
+					</div>
+				</section>
+				<!-- Contact Section End -->
+
 
 				<!--subscription strat -->
-					<section id="contact" class="subscription"> <div class="container">
+				<section id="contact" class="subscription">
+					<div class="container">
 						<div class="subscribe-title text-center">
 							<h2>
 								Share your opinion
@@ -472,8 +490,7 @@
 							<div class="row">
 								<div class="col-sm-5">
 									<p>
-										&copy;copyright. designed and developed by
-										<a href="https://www.themesine.com/">Nizar Tarik</a>
+										<a href="https:/NizarTarik.com">Nizar Tarik</a>
 									</p>
 									<!--/p-->
 								</div>
@@ -483,16 +500,7 @@
 											<i class="fa fa-phone">
 												+212 642621383</i>
 										</span>
-										<a href="#">
-											<i class="fa fa-facebook"></i>
-										</a>
-										<a href="#">
-											<i class="fa fa-twitter"></i>
-										</a>
-										<a href="#">
-											<i class="fa fa-linkedin"></i>
-										</a>
-										<a href="#">
+										<a href="https://github.com/NizarTarik">
 											<i class="fa fa-google-plus"></i>
 										</a>
 									</div>
@@ -992,6 +1000,40 @@
 						box-shadow: 0 0 10px 1px black;
 						margin-bottom: 65px;
 						width: 50%;
+					}
+					.contact-section {
+						padding: 40px 20px;
+						background-color: #fdfdfd;
+						display: flex;
+						justify-content: center;
+						align-items: center;
+					}
+
+					.contact-box {
+						max-width: 600px;
+						background: #fff;
+						border-radius: 16px;
+						padding: 30px;
+						box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+						text-align: center;
+					}
+
+					.contact-details p {
+						margin: 10px 0;
+						font-size: 16px;
+					}
+
+					.map-container {
+						margin-top: 20px;
+					}
+
+					.map-container img {
+						width: 100%;
+						max-width: 300px;
+						height: auto;
+						border-radius: 12px;
+						display: block;
+						margin: 0 auto;
 					}
 				</style>
 				<!-- Include all js compiled plugins (below), or include individual files as needed -->
