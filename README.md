@@ -1,4 +1,4 @@
-# 🇲🇦🍽️ Moroccan Restaurant Information Website
+#  Moroccan Restaurant Information Website 🍽️
 
 A website showcasing Moroccan cuisine with an admin dashboard for managing dishes, user profiles, discounts, and reviews.
 
