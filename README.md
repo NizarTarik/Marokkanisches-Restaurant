@@ -5,6 +5,7 @@ A dynamic website for showcasing a traditional Moroccan restaurant, with both pu
 ## 📑 Table of Contents
 
 - [🌟 Features](#-features)
+- [🔑 Login Information (Admin)](#-login-information-admin)
 - [👨‍🍳 Public Interface](#-public-interface)
 - [🔐 Admin Dashboard](#-admin-dashboard)
 - [🛠️ Technologies Used](#️-technologies-used)
@@ -12,8 +13,15 @@ A dynamic website for showcasing a traditional Moroccan restaurant, with both pu
 - [📸 Screenshots](#-screenshots)
 
 ---
-
 ## 🌟 Features
+## 🔑 Login Information (Admin)
+
+Admin Dashboard Login is available at the route:  
+**`/login`**
+
+> **Default Admin Credentials:**
+> - **Email:** nizartarik994@gmail.com  
+> - **Password:** Nizar457
 
 ### 👨‍🍳 Public Interface
 - Home page with introduction to Moroccan cuisine
